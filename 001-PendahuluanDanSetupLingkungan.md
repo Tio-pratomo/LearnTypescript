@@ -63,22 +63,7 @@ node --version  # Harus menampilkan versi, misalnya v20.10.0
 npm --version   # Harus menampilkan versi, misalnya 10.2.3
 ```
 
-### Langkah 2: Install TypeScript Globally
-
-```bash
-npm install -g typescript
-```
-
-Verifikasi instalasi TypeScript:
-
-```bash
-tsc --version  # Harus menampilkan versi, misalnya Version 5.7.2
-```
-
-> [!note|label:Catatan]
-> TypeScript 5.7 adalah versi terbaru (November 2024) dengan fitur-fitur baru seperti improved type safety dan better error detection.
-
-### Langkah 3: Membuat Proyek TypeScript Pertama
+### Langkah 2: Membuat Proyek TypeScript Pertama
 
 Buat folder baru untuk proyek:
 
@@ -101,7 +86,7 @@ Install TypeScript sebagai development dependency (lokal ke proyek):
 npm install --save-dev typescript
 ```
 
-### Langkah 4: Membuat Konfigurasi TypeScript (`tsconfig.json`)
+### Langkah 3: Membuat Konfigurasi TypeScript (`tsconfig.json`)
 
 File `tsconfig.json` adalah jantung dari proyek TypeScript — mengontrol bagaimana TypeScript compiler bekerja.
 
@@ -118,7 +103,7 @@ Buka `tsconfig.json` dan sesuaikan dengan konfigurasi best practice 2025:
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES2022", // JavaScript version target
-    "lib": ["ES2022"], // Library APIs yang tersedia
+    "lib": ["ES2022", "DOM"], // Library APIs yang tersedia, hapus "DOM" jika tidak berinteraksi dengan browser
 
     /* Modules */
     "module": "commonjs", // Module system (commonjs untuk Node.js)
@@ -152,7 +137,7 @@ Buka `tsconfig.json` dan sesuaikan dengan konfigurasi best practice 2025:
 
 **Penting**: Setting `"strict": true"` sangat direkomendasikan untuk proyek baru. Ini mengaktifkan semua pengecekan tipe yang ketat untuk menghindari bug.
 
-### Langkah 5: Struktur Folder Proyek
+### Langkah 4: Struktur Folder Proyek
 
 Buat struktur folder yang clean:
 
@@ -172,7 +157,7 @@ Buat folder `src`:
 mkdir src
 ```
 
-### Langkah 6: Hello World TypeScript!
+### Langkah 5: Hello World TypeScript!
 
 Buat file `src/index.ts`:
 
@@ -213,7 +198,7 @@ Output:
 Halo, Budi! Selamat belajar TypeScript! 🚀
 ```
 
-### Langkah 7: Watch Mode untuk Development
+### Langkah 6: Watch Mode untuk Development
 
 Agar tidak perlu compile manual setiap kali edit kode, gunakan **watch mode**:
 
@@ -223,7 +208,7 @@ npx tsc --watch
 
 Sekarang TypeScript compiler akan otomatis re-compile setiap kali Anda menyimpan file `.ts`!
 
-### Langkah 8: Setup npm Scripts (Opsional tapi Recommended)
+### Langkah 7: Setup npm Scripts (Opsional tapi Recommended)
 
 Edit `package.json` dan tambahkan scripts:
 
@@ -289,7 +274,7 @@ TypeScript akan mendeteksi error **sebelum** kode dijalankan!
 
 **TypeScript = JavaScript + Static Types** — Memberikan type safety dan tooling yang lebih baik.
 
-**Setup Workflow** — Install Node.js → Install TypeScript → Init project → Configure `tsconfig.json` → Write `.ts` → Compile → Run `.js`.
+**Setup Workflow** — Install Node.js → Init project → Install TypeScript → Configure `tsconfig.json` → Write `.ts` → Compile → Run `.js`.
 
 **Strict Mode** — Selalu gunakan `"strict": true"` untuk type checking maksimal.
 
@@ -324,4 +309,14 @@ console.log(kali(10, 5)); // 50
 console.log(bagi(10, 5)); // 2
 ```
 
-Compile dan jalankan untuk memastikan semuanya bekerja!
+Jika sudah silahkan Compile
+
+```bash
+npx tsc
+```
+
+Kemudian, jalankan untuk memastikan semuanya bekerja!
+
+```bash
+node dist/kalkulator.js
+```
