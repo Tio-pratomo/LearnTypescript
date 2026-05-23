@@ -217,12 +217,12 @@ const rolePermissions = {
 
 ## Praktik
 
-Buat file `src/sesi-4-variables-inference.ts` lalu isi contoh berikut.
+Buat file `src/sesi-5-variables-inference.ts` lalu isi contoh berikut.
 Jalankan sambil memperhatikan error TypeScript-nya.
 
 ```ts
 /**
- * Sesi 4: Variabel dan Type Inference
+ * Sesi 5: Variabel dan Type Inference
  *
  * Tujuan:
  * 1) Paham bedanya let vs const pada inference tipe.

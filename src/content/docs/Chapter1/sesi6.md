@@ -38,7 +38,7 @@ Namun untuk method object/class, tetap pahami perbedaan ini karena function bias
 
 ## Praktik
 
-Buat file `src/sesi-5-functions.ts`, lalu isi contoh-contoh ini dan amati error TypeScript saat kamu mengubah pemanggilannya.
+Buat file `src/sesi-6-functions.ts`, lalu isi contoh-contoh ini dan amati error TypeScript saat kamu mengubah pemanggilannya.
 
 ```ts
 // 1) Parameter & return type
@@ -85,7 +85,7 @@ console.log(toId('  abc  '));
 ```bash
 npm run typecheck
 npm run build
-node dist/sesi-5-functions.js
+node dist/sesi-6-functions.js
 ```
 
 `tsc` akan melakukan type-checking dan emit JavaScript dari file TypeScript kamu.

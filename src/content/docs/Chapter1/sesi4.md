@@ -32,7 +32,7 @@ Untuk memastikan semua kasus union ditangani, pola umum adalah exhaustive check 
 
 ## Praktik
 
-Buat file `src/sesi-7-union-intersection-narrowing.ts`, lalu isi dan jalankan contoh berikut.
+Buat file `src/sesi-4-union-intersection-narrowing.ts`, lalu isi dan jalankan contoh berikut.
 
 ```ts
 // 1) Union + narrowing via typeof
@@ -92,7 +92,7 @@ Jalankan:
 ```bash
 npm run typecheck
 npm run build
-node dist/sesi-7-union-intersection-narrowing.js
+node dist/sesi-4-union-intersection-narrowing.js
 ```
 
 `tsc` akan melakukan type-checking sehingga narrowing dan union handling kamu tervalidasi sebelum kode menjadi JavaScript.

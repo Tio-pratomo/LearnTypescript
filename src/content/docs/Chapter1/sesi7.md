@@ -30,7 +30,7 @@ Cara “mengakali” excess property checks dengan type assertion itu ada, tetap
 
 ## Praktik
 
-Buat file `src/sesi-6-objects-interfaces.ts` lalu isi ini.
+Buat file `src/sesi-7-objects-interfaces.ts` lalu isi ini.
 
 ```ts
 // 1) Interface dasar + optional + readonly
