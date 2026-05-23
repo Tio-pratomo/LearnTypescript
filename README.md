@@ -24,11 +24,13 @@ Kursus ini menyediakan panduan komprehensif untuk belajar TypeScript melalui pen
 ## Struktur Kurikulum
 
 ### Bab I - Dasar TypeScript
+
 1. **Sesi 1-3**: Pengantar TypeScript, cara kerja compiler, dan program pertama
 2. **Sesi 4-6**: Type annotations, sistem tipe, dan konsep dasar
 3. **Sesi 7-8**: Interfaces dan advanced types
 
 ### Bab II - Lanjutan TypeScript
+
 1. **Sesi 1-4**: Generics dan pola-pola lanjutan
 2. **Sesi 5-8**: Utility types dan conditional types
 3. **Sesi 9-10**: Teknik-teknik lanjutan dan best practices
@@ -69,6 +71,7 @@ Untuk menambahkan sesi baru:
 ## Format Konten
 
 File konten menggunakan format MDX yang mendukung:
+
 - Frontmatter YAML untuk metadata
 - Komponen React/Astro (dalam file .mdx)
 - Markdown biasa untuk konten
@@ -76,6 +79,7 @@ File konten menggunakan format MDX yang mendukung:
 - Komponen Starlight seperti `<Steps>` dan `<Card>`
 
 Contoh struktur umum:
+
 ```markdown
 ---
 title: Contoh Judul Sesi
@@ -92,9 +96,9 @@ Deskripsi teori dan konsep...
 2. Langkah kedua...
 </Steps>
 
-```code`
+``code`
 Kode contoh
-```code`
+``code`
 ```
 
 ## Kontribusi
