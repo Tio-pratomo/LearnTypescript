@@ -1,0 +1,92 @@
+---
+title: TypeScript Module
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Sesi 13 akan membuat proyek TypeScript kamu rapi dan scalable lewat konsep modul (import/export) dan pengenalan namespaces.
+
+**Targetnya:** kamu bisa memecah kode jadi banyak file tanpa kehilangan struktur dan keterbacaan.
+
+## Materi: Konsep modules
+
+Modules dipakai untuk mengorganisir kode agar tidak menumpuk di satu file, yang biasanya bikin sulit dibaca dan sulit di-debug saat proyek membesar.
+
+Dengan modules, kamu bisa mengekspor (export) fungsi/object/type dari satu file dan mengimpor (import) di file lain untuk membangun dependency yang jelas.
+
+Pendekatan ini juga membantu maintenance dan reuse karena hanya bagian yang dibutuhkan yang di-load/di-bundle sesuai kebutuhan aplikasi.
+
+## Materi: Konsep namespaces
+
+Namespaces adalah cara spesifik TypeScript untuk “mengelompokkan” kode yang saling terkait di bawah satu nama agar tidak bentrok.
+
+Di praktik modern, namespaces biasanya dipakai lebih jarang dibanding ES Modules, tapi tetap penting dipahami karena bisa kamu temui pada codebase lama atau beberapa library tertentu.
+
+## Praktik: Membuat modul sederhana
+
+<FileTree>
+
+- src/
+  - lib/
+    - math.ts
+    - types.ts
+  - index.ts
+
+</FileTree>
+
+<Steps>
+
+1.  Buat struktur file seperti yang ditunjukkan di atas.
+2.  Isi `src/lib/types.ts`:
+
+    ```ts
+    export type Operation = 'add' | 'mul';
+
+    export interface CalcResult {
+      op: Operation;
+      value: number;
+    }
+    ```
+
+3.  Isi `src/lib/math.ts`:
+
+    ```ts
+    import type { CalcResult, Operation } from './types';
+
+    export function add(a: number, b: number): CalcResult {
+      return { op: 'add', value: a + b };
+    }
+
+    export function mul(a: number, b: number): CalcResult {
+      return { op: 'mul', value: a * b };
+    }
+
+    export function calc(op: Operation, a: number, b: number): CalcResult {
+      return op === 'add' ? add(a, b) : mul(a, b);
+    }
+    ```
+
+4.  Isi `src/index.ts`:
+
+    ```ts
+    import { calc } from './lib/math';
+
+    console.log(calc('add', 2, 3));
+    console.log(calc('mul', 4, 5));
+    ```
+
+5.  Jalankan:
+
+    ```bash
+    npm run typecheck
+    npm run build
+    node dist/index.js
+    ```
+
+</Steps>
+
+## Praktik: Pola organisasi yang rapi
+
+- **Barrel export (opsional):** buat `src/lib/index.ts` yang mengekspor ulang semua public API agar import lebih bersih, karena modul memang dirancang untuk memudahkan pengelolaan dependensi antar file.
+
+- Pisahkan `type`/`interface` ke file `types.ts` seperti contoh di atas supaya kontrak data stabil dan mudah dipakai ulang lintas modul.

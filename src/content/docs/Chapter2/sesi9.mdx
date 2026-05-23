@@ -1,0 +1,231 @@
+---
+title: Praktek III
+---
+
+Ya, **perlu** dipisah: Sesi 17 memang tepat jadi sesi khusus “monorepo + workspaces”, sedangkan versi “2 folder terpisah” sudah kamu lakukan di Sesi 15.
+
+Di Sesi 17 ini, targetnya: kamu paham cara menyusun repo yang berisi **CLI Node.js + Web Vite** + **shared package** (types/utils) dengan npm workspaces.
+
+## Materi: Konsep monorepo (npm workspaces)
+
+Npm workspaces didefinisikan lewat field `"workspaces"` di root `package.json`, dan setelah `npm install`, npm akan mengelola dependency lintas folder workspace dari root.
+
+Kamu bisa menjalankan script pada workspace tertentu dengan `npm run <script> --workspace=<nama>` atau menjalankan ke semua workspace dengan `--workspaces`.
+
+Monorepo biasanya membagi folder menjadi `apps/*` (aplikasi) dan `packages/*` (library/shared), supaya boundary jelas dan dependency lebih rapi.
+
+## Praktik: Membuat monorepo dari nol
+
+### Struktur folder
+
+Buat struktur ini:
+
+```
+ts-monorepo/
+  package.json
+  apps/
+    cli/
+    web/
+  packages/
+    shared/
+```
+
+### Root workspace
+
+Di `ts-monorepo/package.json`:
+
+```jsonc
+{
+  "name": "ts-fullstack-monorepo",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm run dev --workspace web",
+    "start:cli": "npm run start --workspace cli",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+  },
+}
+```
+
+`"private": true` dan `"workspaces": [...]` adalah pola utama untuk mengaktifkan dan mendefinisikan workspace di npm.
+
+Menjalankan script per-workspace menggunakan flag `--workspace` adalah kemampuan resmi npm.
+
+### Buat `packages/shared` (shared types + utils)
+
+Di `packages/shared/package.json`:
+
+```jsonc
+{
+  "name": "@repo/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+  },
+}
+```
+
+Di `packages/shared/tsconfig.json`:
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+  },
+  "include": ["src"],
+}
+```
+
+Di `packages/shared/src/index.ts`:
+
+```ts
+export type UserPublic = {
+  id: string;
+  name: string;
+};
+
+export function formatUser(u: UserPublic): string {
+  return `${u.id}:${u.name}`;
+}
+```
+
+### Buat `apps/cli` (Node CLI)
+
+Di `apps/cli/package.json`:
+
+```jsonc
+{
+  "name": "cli",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js",
+  },
+}
+```
+
+Dependency `"workspace:*"` adalah cara umum merujuk package workspace lokal dari workspace lain.
+
+Di `apps/cli/tsconfig.json`:
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+  },
+  "include": ["src"],
+}
+```
+
+Di `apps/cli/src/index.ts`:
+
+```ts
+import { formatUser, type UserPublic } from '@repo/shared';
+
+const name = process.argv[2] ?? 'Alya';
+
+const u: UserPublic = { id: 'u-1', name };
+console.log(formatUser(u));
+```
+
+### Buat `apps/web` (Vite vanilla-ts + axios)
+
+Scaffold di folder `apps/web`:
+
+```bash
+cd ts-monorepo
+npm create vite@latest apps/web -- --template vanilla-ts
+npm install
+npm install axios --workspace web
+```
+
+Vite mendukung scaffolding via `npm create vite@latest` dan template `vanilla-ts`.
+
+Lalu tambahkan dependency shared di `apps/web/package.json`:
+
+```jsonc
+{
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "axios": "^1.0.0",
+  },
+}
+```
+
+Di `apps/web/src/main.ts` (contoh pakai shared + DOM event + fetch + axios):
+
+```ts
+import axios from 'axios';
+import { formatUser, type UserPublic } from '@repo/shared';
+import './style.css';
+
+const app = document.querySelector<HTMLDivElement>('#app');
+if (!app) throw new Error('Missing #app');
+
+app.innerHTML = `
+  <form id="form">
+    <input id="name" placeholder="Alya" />
+    <button type="submit">Run</button>
+  </form>
+  <pre id="out"></pre>
+`;
+
+const form = document.querySelector<HTMLFormElement>('#form')!;
+const input = document.querySelector<HTMLInputElement>('#name')!;
+const out = document.querySelector<HTMLPreElement>('#out')!;
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const u: UserPublic = { id: 'u-web', name: input.value || 'Alya' };
+  const sharedMsg = formatUser(u);
+
+  const res = await fetch('https://httpbin.org/get');
+  const fetchJson = await res.json();
+
+  const { data } = await axios.get('https://httpbin.org/get');
+
+  out.textContent = JSON.stringify({ sharedMsg, fetchJson, axios: data }, null, 2);
+});
+```
+
+### Install & jalankan dari root
+
+Dari `ts-monorepo/`:
+
+```bash
+npm install
+npm run build
+npm run start:cli -- Bima
+npm run dev:web
+```
+
+Menjalankan script per workspace menggunakan `--workspace`/`--workspaces` adalah workflow yang didukung npm.
+
+## Debug checklist (biar tidak nyangkut)
+
+- Jika `apps/web` tidak bisa resolve `@repo/shared`, jalankan `npm run build` dulu agar `packages/shared/dist` ada (karena web mengimpor runtime function `formatUser`).
+
+- Jika ingin shared dipakai hanya untuk **types** tanpa build, gunakan `import type { ... }` saja (tanpa import function runtime), tapi untuk kasus kita sengaja ada utils agar terlihat end-to-end.

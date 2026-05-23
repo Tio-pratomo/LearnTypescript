@@ -1,0 +1,88 @@
+---
+title: interface vs type
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Sesi 8 membahas perbedaan `interface` vs `type` (type alias) dan cara memilih yang paling tepat di proyek TypeScript modern.
+
+## Materi: Konsep inti
+
+`interface` dan `type` sama-sama dipakai untuk mendeskripsikan “shape” object, dan karena TypeScript adalah structural type system, keduanya sering bisa saling menggantikan untuk kasus sederhana.
+
+Perbedaan besar: `interface` bersifat “open” karena mendukung **declaration merging** (interface dengan nama sama bisa digabung oleh compiler), sedangkan `type` bersifat “closed” (tidak bisa dideklarasikan ulang untuk digabung).
+
+TypeScript juga mencontohkan bahwa `interface` sering memberi error message yang lebih “terarah” dibanding type alias pada beberapa situasi, jadi banyak tim memilih `interface` sebagai default untuk kontrak object publik.
+
+## Materi: Kapan pakai yang mana
+
+Gunakan `interface` ketika:
+
+- Membuat kontrak object yang diekspor luas (DTO/API types) dan kamu ingin opsi “augment/merge” di masa depan (misalnya untuk patch typing library).
+
+- Model data utama yang akan sering di-`extends`/`implements` oleh class atau turunan lain, dan ingin style OOP yang jelas.
+
+Gunakan `type` ketika:
+
+- Membuat **union** atau **discriminated union** (contoh: `Success | Error`) karena ini adalah pola natural untuk type alias.
+
+- Membuat tipe komposisi yang “sekali jadi” dan tidak ingin bisa diubah dari luar (closed), atau saat perlu intersection (`A & B`) untuk menggabungkan kontrak.
+
+<Aside title="Catatan" type="tip" icon="open-book">
+  type alias tidak bisa di-merge seperti interface, jadi kalau butuh “menambah properti belakangan”
+  pilih interface.
+</Aside>
+
+## Praktik
+
+Buat file `src/sesi-8-type-vs-interface.ts` dan isi ini untuk merasakan bedanya secara langsung.
+
+```ts
+// 1) Interface (open) - bisa declaration merging
+interface UserDTO {
+  id: string;
+  name: string;
+}
+
+interface UserDTO {
+  email?: string; // merged
+}
+
+const u: UserDTO = { id: 'u1', name: 'Alya' };
+
+// 2) Type alias (closed) - cocok untuk union
+type ApiSuccess = { ok: true; data: UserDTO };
+type ApiError = { ok: false; error: { message: string } };
+type ApiResponse = ApiSuccess | ApiError;
+
+function handle(resp: ApiResponse) {
+  if (resp.ok) return resp.data.name;
+  return resp.error.message;
+}
+
+// 3) Intersection dengan type alias
+type WithTimestamps = { createdAt: Date; updatedAt: Date };
+type UserEntity = UserDTO & WithTimestamps;
+
+const ue: UserEntity = {
+  id: 'u2',
+  name: 'Bima',
+  email: 'b@x.com',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+```
+
+Jalankan:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+`typecheck` memastikan kontrak `interface`/`type` kamu tervalidasi sebelum masuk runtime.
+
+**Tugas kecil:**
+
+1. Buat `interface ProductDTO` lalu extend jadi `interface DigitalProductDTO extends ProductDTO` (latihan pola interface untuk model data).
+2. Buat `type PaymentMethod = "qris" | "va" | "cc"` lalu gunakan untuk mengetik parameter function `pay(method: PaymentMethod)` (latihan union + literal types).

@@ -1,0 +1,81 @@
+---
+title: Praktek II
+---
+
+Masuk **Sesi 16**: fokusnya membuat kamu siap “kerja nyata”—best practices TypeScript, beberapa design pattern yang paling relevan, dan strategi migrasi/integrasi TypeScript ke proyek yang sudah ada.
+
+## Materi: Best practices TypeScript
+
+Pondasi kualitas codebase TypeScript ada di konfigurasi compiler: mengaktifkan mode `strict` membuat type-checking jauh lebih ketat sehingga bug lebih banyak ketangkap sebelum runtime.
+
+Salah satu flag kunci yang sering jadi penyelamat adalah `strictNullChecks`, karena saat `true` maka `null` dan `undefined` diperlakukan sebagai tipe yang berbeda dan penggunaan yang tidak aman akan jadi error.
+
+Praktik lain yang konsisten dipakai tim adalah meminimalkan `any` (lebih baik `unknown` + narrowing), menjaga kontrak data di satu tempat (DTO/types), dan gunakan utilitas seperti `Pick/Omit/Partial` daripada menyalin tipe manual.
+
+## Materi: Design patterns (yang paling kepakai)
+
+Kerangka belajar menyebut pola seperti **Factory**, **Singleton**, dan **Observer** sebagai pola yang relevan di TypeScript untuk menyelesaikan masalah desain yang umum.
+
+Di codebase TypeScript modern, Factory sering dipakai untuk membuat instance berdasarkan konfigurasi (mis. memilih HTTP client), Singleton untuk objek shared seperti config/logger/client, dan Observer untuk model publish/subscribe (event system).
+
+Yang penting: pattern dipakai ketika ada problem desainnya; kalau dipaksakan, justru bikin kompleks.
+
+## Materi: Migrasi/integrasi dari JavaScript
+
+Strategi yang aman adalah migrasi bertahap: mulai dengan mengaktifkan `allowJs` agar file `.js` bisa ikut diproses TypeScript, lalu `checkJs` agar file `.js` juga ikut di-typecheck.
+
+Setelah itu lakukan rename perlahan `.js` → `.ts` per modul, sambil menambah tipe di boundary penting (function publik, payload API, model DB) sebelum merapikan detail internal.
+
+Sambil migrasi, biasakan mengganti `@ts-ignore`/`any` dengan typing yang benar dan aktifkan strictness sedikit demi sedikit agar progress tetap jalan tanpa “meledakkan” error sekaligus.
+
+## Praktik: Template “production-ready”
+
+1. Perkuat `tsconfig.json` (minimal yang paling kerasa impact-nya)
+
+```jsonc
+{
+  "compilerOptions": {
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+  },
+}
+```
+
+Mengaktifkan `strict` dan `strictNullChecks` membuat kesalahan null/undefined dan banyak “lubang” tipe lebih cepat ketahuan.
+
+2. Checklist hygiene project
+
+- Gunakan ESLint + Prettier untuk konsistensi style dan pencegahan bug umum.
+- Pisahkan tipe publik (`types.ts`) dan implementasi (`*.ts`) agar API internal lebih stabil.
+- Untuk async API, pastikan return type jelas (mis. `Promise<ApiResponse<T>>`) dan lakukan narrowing di call site.
+
+3. Mini-pattern: Factory yang aman (contoh kecil)
+
+```ts
+type HttpClient = {
+  get<T>(url: string): Promise<T>;
+};
+
+class FetchClient implements HttpClient {
+  async get<T>(url: string): Promise<T> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return (await res.json()) as T;
+  }
+}
+
+function createHttpClient(kind: 'fetch'): HttpClient {
+  if (kind === 'fetch') return new FetchClient();
+  // exhaustive check
+  const _never: never = kind;
+  return _never;
+}
+```
+
+Ini menggabungkan union literal + narrowing agar pilihan implementasi tetap type-safe.
+
+Kalau sesi 16 ini sudah clear, sesi berikutnya bisa dibuat sebagai **Sesi 17 (tambahan)** khusus monorepo (npm workspaces + shared package) karena kompleksitasnya memang beda level dari best practices/design patterns.

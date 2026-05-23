@@ -1,0 +1,150 @@
+---
+title: Pendahuluan TypeScript
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Kita mulai **Sesi 1** dengan tujuan:
+
+- Paham apa itu TypeScript,
+- Cara kerjanya (compile ke JavaScript), dan
+- Mencoba program pertama sampai bisa jalan.
+
+## Materi: Pengetahuan & Konsep
+
+TypeScript adalah bahasa open-source dari Microsoft yang menambahkan static types ke JavaScript untuk membantu menangkap error lebih awal, terutama saat aplikasi makin besar.
+
+TypeScript adalah “superset” JavaScript. Kode JavaScript yang valid pada dasarnya juga valid di TypeScript. TypeScript juga menambahkan beberapa fitur seperti interface, generics, dan enum.
+
+Kode TypeScript tidak dieksekusi langsung oleh browser/Node. Ia **ditranspile** (di-compile) menjadi JavaScript memakai TypeScript compiler `tsc`, sekaligus melakukan type-checking.
+
+Nilai jual paling terasa ada di tooling seperti auto-complete, navigasi kode, dan refactor lebih aman di IDE seperti VS Code, karena TypeScript punya informasi tipe yang jelas.
+
+Setup environment yang umum: install Node.js + npm, pasang TypeScript, siapkan VS Code (sering dipasangkan dengan ESLint + Prettier), lalu atur `tsconfig.json` untuk compiler options.
+
+## Praktik
+
+<Steps>
+
+1.  **Buat project baru**
+
+    ```bash
+    mkdir belajar-ts
+    cd belajar-ts
+    npm init -y
+    ```
+
+2.  **Install TypeScript (disarankan lokal per project)**
+
+    ```bash
+    npm i -D typescript
+    ```
+
+    TypeScript nantinya dijalankan via `tsc` untuk parsing, type-checking, dan emit JavaScript.
+
+3.  **Inisialisasi `tsconfig.json`**
+
+    ```bash
+    npx tsc --init
+    ```
+
+    `tsconfig.json` dipakai untuk mengatur perilaku compiler (mis. target output JS, module system, strictness, dll).
+
+4.  **Rapikan struktur folder + edit `tsconfig.json`**
+
+    Buat folder:
+
+    ```bash
+    mkdir src dist
+    ```
+
+    Lalu ubah (atau tambahkan) konfigurasi inti ini di `tsconfig.json`:
+
+    ```jsonc title="tsconfig.json"
+    {
+      "compilerOptions": {
+        "target": "ES2020",
+        "module": "CommonJS",
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+      },
+    }
+    ```
+
+    Mode `strict` mengaktifkan pengecekan tipe yang lebih ketat untuk mengurangi bug yang lolos ke runtime.
+
+5.  **Tulis program TypeScript pertama**
+
+    Buat file `src/index.ts`, kemudian tulis kode di bawah ini:
+
+    ```ts title="src/index.ts"
+    function greet(name: string): string {
+      return `Halo, ${name}`;
+    }
+
+    console.log(greet('TypeScript'));
+    ```
+
+    Ini contoh sederhana type annotation pada parameter dan return function.
+
+6.  **Compile dan jalankan**
+
+    ```bash
+    npx tsc
+    node dist/index.js
+    ```
+
+    Kalau berhasil, output akan muncul di terminal, dan file JavaScript hasil compile ada di folder `dist`.
+
+7.  **Optional Setting**
+
+    Agar kompilasi otomatis ulang saat file berubah, Tambahkan script di `package.json`:
+
+    ```json
+    "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch & npx nodemon dist/index.js"  // butuh nodemon
+    }
+    ```
+
+    Atau gunakan `tsx` (TypeScript Execute yang lebih modern) untuk menjalankan TypeScript langsung tanpa compile:
+
+    `npm i -D tsx` lalu `npx tsx src/index.ts`.
+
+    ***
+
+    Agar folder `dist` otomatis dibersihkan sebelum compile, Pasang `rimraf` lalu di script:
+
+    ```json
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc"
+    ```
+
+    ***
+
+    Untuk environment browser (bukan Node.js), Jika ingin menjalankan di browser, ubah:
+
+    ```jsonc
+    "module": "ESNext",        // biar output pakai import/export
+    "outDir": "./dist",        // atau "outDir": "./public/js"
+    "lib": ["ES2020", "DOM"],  // tambahkan DOM typings
+    ```
+
+    Dan gunakan bundler (Vite, Webpack) untuk menggabungkan modul.
+
+    ***
+
+    Agar lebih ketat untuk produksi (setelah belajar), Tambahkan opsi:
+
+    ```jsonc
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true
+    ```
+
+</Steps>

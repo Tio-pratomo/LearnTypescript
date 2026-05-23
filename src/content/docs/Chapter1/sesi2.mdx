@@ -1,0 +1,131 @@
+---
+title: Lingkup Kerja Typescript
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Sesi ini fokusnya bikin environment TypeScript yang nyaman dipakai harian:
+
+- Editor siap,
+- Format konsisten, dan
+- Linting jalan otomatis.
+
+## Toolchain TypeScript
+
+TypeScript biasanya dipakai bersama Node.js + npm untuk mengelola dependency dan menjalankan compiler `tsc`, lalu hasilnya di-emit menjadi JavaScript untuk dieksekusi di browser atau Node.js.
+
+Agar kualitas kode stabil, praktik umum adalah menambahkan linting (ESLint + TypeScript rules) dan formatting (Prettier) supaya kesalahan dan inkonsistensi gaya cepat ketahuan.
+
+Konfigurasi utama compiler disimpan di `tsconfig.json` agar opsi compile (mis. struktur output `outDir` dan disiplin pengecekan dengan `strict`) konsisten di semua mesin.
+
+## Praktik: Setup lengkap
+
+<Steps>
+
+1.  **Pastikan dependency dev terpasang (lanjutan dari Sesi 1)**
+
+    **Di root project**
+
+    ```bash wrap
+    npm i -D eslint @eslint/js typescript-eslint prettier eslint-config-prettier
+    ```
+
+    Paket `typescript-eslint` menyediakan konfigurasi ESLint recommended untuk TypeScript, dan contoh konfigurasinya memakai file `eslint.config.mjs` (format ESLint modern/flat config).
+
+    `eslint-config-prettier` dipakai untuk mematikan rules ESLint yang konflik dengan Prettier.
+
+2.  **Buat konfigurasi ESLint (flat config)**
+
+    Buat file `eslint.config.mjs`:
+
+    ```js wrap
+    // @ts-check
+    import eslint from '@eslint/js';
+    import { defineConfig } from 'eslint/config';
+    import tseslint from 'typescript-eslint';
+
+    export default defineConfig(eslint.configs.recommended, tseslint.configs.recommended, {
+      ignores: ['dist/**'],
+    });
+    ```
+
+    Struktur ini mengikuti quickstart `typescript-eslint` untuk menyalakan rules recommended dan bisa dijalankan dengan `npx eslint .`.
+
+3.  **Tambahkan Prettier (tanpa “berantem” dengan ESLint)**
+
+    Buat `.prettierrc.json`:
+
+    ```json
+    {
+      "semi": true,
+      "singleQuote": true
+    }
+    ```
+
+    Lalu update `eslint.config.mjs` supaya Prettier tidak konflik (posisikan “prettier” terakhir):
+
+    ```js ins={5,10} wrap
+    // @ts-check
+    import eslint from '@eslint/js';
+    import { defineConfig } from 'eslint/config';
+    import tseslint from 'typescript-eslint';
+    import eslintConfigPrettier from 'eslint-config-prettier/flat';
+
+    export default defineConfig(
+      eslint.configs.recommended,
+      tseslint.configs.recommended,
+      eslintConfigPrettier,
+      {
+        ignores: ['dist/**'],
+      }
+    );
+    ```
+
+    `eslint-config-prettier` memang didesain untuk menonaktifkan rules yang berpotensi konflik dengan Prettier.
+
+4.  **Tambahkan script di `package.json`**
+
+    ```json
+    {
+      "scripts": {
+        "build": "tsc",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint .",
+        "format": "prettier . --write"
+      }
+    }
+    ```
+
+    Menjalankan `tsc` adalah workflow standar untuk parsing, type-checking, dan emit JavaScript.
+    `npx eslint .` (atau lewat script `npm run lint`) akan melint semua file TypeScript yang dikenali di folder project.
+
+5.  **Setting VS Code (opsional tapi sangat disarankan)**
+
+    Di `.vscode/settings.json`:
+
+    ```json wrap
+    {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+      "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+      }
+    }
+    ```
+
+    Konsepnya: ESLint auto-fix saat save, dan Prettier jadi formatter default untuk TypeScript.
+
+</Steps>
+
+## Checklist hasil
+
+Coba jalankan ini dan pastikan tidak error:
+
+```bash
+npm run typecheck
+npm run lint
+npm run format
+npm run build
+```
